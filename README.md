@@ -1,3 +1,3 @@
-# API Skeleton with WebFlux
+# SpringBoot WebFlux API Skeleton
 
 WIP...
