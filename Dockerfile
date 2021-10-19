@@ -8,7 +8,7 @@ RUN cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 RUN echo "Asia/Seoul" > /etc/timezone
 RUN apk add curl
 
-ARG JAR_FILE=./build/libs/api-skeleton.jar
+ARG JAR_FILE=./build/libs/api-skeleton-0.0.1.jar
 ADD ${JAR_FILE} /api-skeleton.jar
 
 ENTRYPOINT java \
