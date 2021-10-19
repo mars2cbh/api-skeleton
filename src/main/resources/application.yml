@@ -1,0 +1,35 @@
+spring:
+  profiles:
+    active: local
+  mvc:
+    throw-exception-if-no-handler-found: true
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 110MB
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 8080
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: '{"time": "%{yyyy-MM-dd''T''HH:mm:ss.SSSZ"}t, "X-Forwarded-For": "%{X-Forwarded-For}i", "ip": "%a", "requestTime": "%T", "status": "%s", "size": "%B", "userAgent": "%{User-Agent}i", "referer": "%{Referer}i", "uri": "%U", "method": "%m", "args": "%q", "Accept-Encoding": "%{Accept-Encoding}i"}'
+      directory: ./
+      max-days: 14
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info,refresh
+
+logging:
+  level:
+    com:
+      mzc:
+        megatoi: INFO
