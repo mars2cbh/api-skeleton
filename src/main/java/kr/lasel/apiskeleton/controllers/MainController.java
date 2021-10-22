@@ -1,11 +1,13 @@
 package kr.lasel.apiskeleton.controllers;
 
-import kr.lasel.apiskeleton.commons.exceptions.CustomException;
+import javax.validation.Valid;
+import kr.lasel.apiskeleton.models.RequestModel;
 import kr.lasel.apiskeleton.models.ResponseModel;
 import kr.lasel.apiskeleton.services.MainService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -35,10 +37,17 @@ public class MainController {
 
   }
 
-  @GetMapping("/error")
-  public ResponseEntity<Mono<String>> error() {
-    throw new CustomException(HttpStatus.PRECONDITION_FAILED,
-        HttpStatus.PRECONDITION_FAILED.getReasonPhrase());
+  @GetMapping("/me")
+  public ResponseEntity<Mono<String>> me(
+      ServerHttpRequest httpRequest,
+      @Valid RequestModel requestModel) {
+
+    ResponseModel responseModel = new ResponseModel();
+
+    responseModel.setData("Hello " + requestModel.getName()
+        + ". Age is " + String.valueOf(requestModel.getAge()));
+
+    return responseModel.toResponse();
   }
 
 }
