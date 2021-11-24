@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.WebExchangeBindException;
+import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler({WebExchangeBindException.class})
-  public ResponseEntity<Mono<String>> handleClientFault(WebExchangeBindException ex) {
+  public Mono<ResponseEntity<String>> handleClientFault(WebExchangeBindException ex) {
     List<String> errors = new ArrayList<>();
     ex.getBindingResult().getAllErrors()
         .forEach(error -> errors.add(error.getDefaultMessage()));
@@ -24,6 +25,7 @@ public class GlobalExceptionHandler {
     responseModel.setData(errors);
     responseModel.setStatus(HttpStatus.BAD_REQUEST);
     responseModel.setMessage("Invalid request parameter");
-    return responseModel.toResponse();
+
+    return Mono.just(responseModel.toResponse());
   }
 }

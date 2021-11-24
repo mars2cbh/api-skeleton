@@ -30,6 +30,14 @@ management:
 
 logging:
   level:
-    com:
-      mzc:
-        megatoi: INFO
+    root: DEBUG
+    kr.lasel.apiskeleton: DEBUG
+
+kakaowether:
+  scheme: https
+  host: map.kakao.com
+  path: /api/dapi/point/weather
+  connectTimeout: 1000
+  readTimeout: 3000
+  writeTimeout: 3000
+  poolCount: 500
