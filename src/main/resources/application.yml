@@ -9,6 +9,12 @@ spring:
       max-request-size: 110MB
   main:
     allow-bean-definition-overriding: true
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    timeout: 3000
+    prefix: test
+    database: 1
 
 server:
   port: 8080
@@ -30,8 +36,9 @@ management:
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
     kr.lasel.apiskeleton: DEBUG
+
 
 kakaowether:
   scheme: https
