@@ -9,12 +9,24 @@ spring:
       max-request-size: 110MB
   main:
     allow-bean-definition-overriding: true
-  redis:
+
+cache:
+  result:
     host: 127.0.0.1
     port: 6379
+    database: 0
     timeout: 3000
-    prefix: test
+    prefix: result
+    expireSeconds: 180
+    expireCount: 3
+  failover:
+    host: 127.0.0.1
     database: 1
+    port: 6379
+    timeout: 3000
+    prefix: failover
+    expireSeconds: 86400
+    limitCount: 10000
 
 server:
   port: 8080

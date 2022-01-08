@@ -58,9 +58,10 @@ public class MainController {
   public Mono<ResponseEntity<String>> weather(
       ServerHttpRequest httpRequest) {
 
+    ResponseModel responseModel = new ResponseModel();
+
     return mainService.getWeather(KakaoWetherRequestModel.builder().build())
         .map(kakaoWetherResponseModel -> {
-          ResponseModel responseModel = new ResponseModel();
           responseModel.setData(kakaoWetherResponseModel);
           return responseModel.toResponse();
         });
