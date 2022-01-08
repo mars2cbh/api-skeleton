@@ -7,9 +7,9 @@ import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
+import kr.lasel.apiskeleton.commons.Constants;
 import kr.lasel.apiskeleton.config.KakaoWetherProperties;
 import kr.lasel.apiskeleton.helper.ResultCacheManager;
 import kr.lasel.apiskeleton.models.KakaoWetherRequestModel;
@@ -24,7 +24,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
@@ -58,7 +57,7 @@ public class KakaoWetherApiContext {
         .clientConnector(new ReactorClientHttpConnector(
             HttpClient.create(connectionProvider)
                 .headers(entries -> entries
-                    .add("User-Agent", "ApiSkelton"))
+                    .add("User-Agent", Constants.USER_AGENT))
                 .compress(true)
                 .followRedirect(true)
                 .keepAlive(true)
