@@ -11,15 +11,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
-import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 @Slf4j
 @Component
 public class ResultCacheManager {
 
+  private static final String EMPTY_STRING = "";
   private static final String CACHE_COUNT_SUFFIX = "_hit";
 
   final
@@ -55,10 +53,10 @@ public class ResultCacheManager {
     try {
       connection = redisClient.connect();
       reactiveCommands = connection.reactive();
-      log.info("Connect Success.");
+      log.info("Redis Connect Success.");
       refresh();
     } catch (Exception e) {
-      log.error("Redis Connect Error.", e);
+      log.error("Redis Connect Error : {}", e.getLocalizedMessage());
     }
   }
 
@@ -90,8 +88,14 @@ public class ResultCacheManager {
     String cacheKey = generateCacheKey(key);
 
     try {
-      setCache(cacheKey, resultCacheProperties.getExpireSeconds(), value).subscribe();
-      setCache(generateCacheCountKey(cacheKey), resultCacheProperties.getExpireSeconds(), "0").subscribe();
+
+      setCache(cacheKey, resultCacheProperties.getExpireSeconds(), value)
+          .subscribe(successValue -> {
+            setCache(generateCacheCountKey(cacheKey), resultCacheProperties.getExpireSeconds(), "0").subscribe();
+          }, error -> {
+            log.debug("set key {} error : {}", cacheKey, error.getLocalizedMessage());
+          });
+
     } catch (Exception e) {
       log.debug("Set Cache Error : ", e);
     }
@@ -106,56 +110,27 @@ public class ResultCacheManager {
           if (aBoolean) {
             return incrementCache(generateCacheCountKey(cacheKey))
                 .flatMap(cacheCount -> {
-                  log.debug("[#Cache] get cache hit count  : {}", cacheCount);
-
+                  log.debug("[#Cache] get cache hit count : {}", cacheCount);
                   if (cacheCount > resultCacheProperties.getExpireCount()) {
-                    log.debug("[#Cache] Deleted Key : {}", cacheKey);
+                    log.debug("[#Cache] remove cache : {}", cacheKey);
                     return removeCache(cacheKey)
-                        .flatMap(aLong -> Mono.just(""));
+                        .flatMap(aLong -> Mono.just(EMPTY_STRING));
                   } else {
                     return getCache(cacheKey);
                   }
                 });
           } else {
-            return Mono.just("");
+            return Mono.just(EMPTY_STRING);
           }
         });
-//    try {
-//
-//      if (existCache(key)) {
-//        long cacheCount = incrementCache(generateCacheCountKey(key));
-//        log.debug("[#Cache] get cache hit count  : {}", cacheCount);
-//
-//        if (cacheCount >= resultCacheProperties.getExpireCount()) {
-//          log.debug("[#Cache] Deleted Key : {}", key);
-//          removeCache(key);
-//        } else {
-//          result = getCache(key);
-//        }
-//      }
-//    } catch (Exception e) {
-//      log.error(e.getMessage());
-//    }
-//
-//    return result;
   }
 
   private Mono<Long> incrementCache(String key) {
-
-    if (connection == null || !connection.isOpen()) {
-      return Mono.just(0L);
-    }
-
     return reactiveCommands.incr(key)
         .flatMap(Mono::just);
   }
 
   private Mono<Long> removeCache(String key) {
-
-    if (connection == null || !connection.isOpen()) {
-      return Mono.just(0L);
-    }
-
     return reactiveCommands.del(key)
         .flatMap(Mono::just);
 
@@ -173,7 +148,7 @@ public class ResultCacheManager {
         })
         .map(aLong -> {
           if (aLong > 0) {
-            log.debug("[#Cache] {} exist.", key);
+            log.debug("[#Cache] exist cache : {}.", key);
           }
           return aLong > 0;
         });
@@ -218,7 +193,7 @@ public class ResultCacheManager {
           log.debug("[#Cache] set cache : {}", key);
         })
         .doOnError(e -> {
-          log.debug("[#Cache] Failed to set cache! : {} : ", key);
+          log.warn("[#Cache] Failed to set cache! : {} : {}", key, e.getLocalizedMessage());
         })
         .flatMap(s -> {
           if (s.equalsIgnoreCase("ok")) {
@@ -230,11 +205,6 @@ public class ResultCacheManager {
   }
 
   private Mono<String> getCache(String key) {
-
-    if (connection == null || !connection.isOpen()) {
-      return Mono.just("");
-    }
-
     return reactiveCommands.get(key)
         .flatMap(Mono::just);
   }
