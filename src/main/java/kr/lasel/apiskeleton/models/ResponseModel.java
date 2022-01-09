@@ -25,6 +25,7 @@ public class ResponseModel {
   @Setter
   private Object data;
 
+  @Setter
   long startTime;
 
   public ResponseModel() {
@@ -55,7 +56,7 @@ public class ResponseModel {
       result.put("data", data);
     }
 
-    result.put("executeTime", (endTime - startTime));
+    result.put("executeTime", (endTime - startTime) + " ms");
 
     return JsonUtils.convertObjectToJsonString(result);
 

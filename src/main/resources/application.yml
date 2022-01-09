@@ -10,6 +10,24 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+cache:
+  result:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    timeout: 3000
+    prefix: result
+    expireSeconds: 180
+    expireCount: 3
+  failover:
+    host: 127.0.0.1
+    port: 6379
+    database: 1
+    timeout: 3000
+    prefix: failover
+    expireSeconds: 86400
+    limitCount: 10000
+
 server:
   port: 8080
   tomcat:
@@ -30,8 +48,9 @@ management:
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
     kr.lasel.apiskeleton: DEBUG
+
 
 kakaowether:
   scheme: https
