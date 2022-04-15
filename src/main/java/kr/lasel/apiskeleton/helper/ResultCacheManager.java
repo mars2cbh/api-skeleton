@@ -1,5 +1,7 @@
 package kr.lasel.apiskeleton.helper;
 
+import static io.netty.util.internal.StringUtil.EMPTY_STRING;
+
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.reactive.RedisReactiveCommands;
@@ -17,7 +19,6 @@ import reactor.core.publisher.Mono;
 @Component
 public class ResultCacheManager {
 
-  private static final String EMPTY_STRING = "";
   private static final String CACHE_COUNT_SUFFIX = "_hit";
 
   final

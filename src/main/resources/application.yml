@@ -10,6 +10,18 @@ spring:
   main:
     allow-bean-definition-overriding: true
 
+elasticsearch:
+  hosts: 127.0.0.1:9200
+  connectTimeout: 3000
+  connectRequestTimeout: 50000
+  socketTimeout: 5000
+
+resilience4j.circuitbreaker:
+  instances:
+    elasticsearch:
+      slidingWindowSize: 3
+      permittedNumberOfCallsInHalfOpenState: 1
+
 cache:
   result:
     host: 127.0.0.1
