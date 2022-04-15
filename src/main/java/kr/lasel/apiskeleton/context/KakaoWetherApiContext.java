@@ -1,6 +1,5 @@
 package kr.lasel.apiskeleton.context;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import kr.lasel.apiskeleton.commons.Constants;
+import kr.lasel.apiskeleton.commons.utils.JsonUtils;
 import kr.lasel.apiskeleton.config.KakaoWetherProperties;
 import kr.lasel.apiskeleton.helper.ResultCacheManager;
 import kr.lasel.apiskeleton.models.KakaoWetherRequestModel;
@@ -95,7 +95,7 @@ public class KakaoWetherApiContext {
     return resultCacheManager.getCacheData(key)
         .flatMap(s -> {
           if (StringUtils.hasText(s)) {
-            return Mono.just(stringToObject(s, KakaoWetherResponseModel.class));
+            return Mono.just(JsonUtils.stringToObject(s, KakaoWetherResponseModel.class));
           } else {
             Map<String, String> map = objectMapper.convertValue(requestModel, new TypeReference<Map<String,String>>() {});
             LinkedMultiValueMap<String, String> linkedMultiValueMap = new LinkedMultiValueMap<>();
@@ -112,28 +112,10 @@ public class KakaoWetherApiContext {
                 .retrieve()
                 .bodyToMono(KakaoWetherResponseModel.class)
                 .doOnNext(k -> {
-                  resultCacheManager.setCacheData(key, this.objectToString(k));
+                  resultCacheManager.setCacheData(key, JsonUtils.objectToString(k));
                 })
                 .retry(3);
           }
         });
   }
-
-  private String objectToString(Object object) {
-    try {
-      return objectMapper.writeValueAsString(object);
-    } catch (JsonProcessingException e) {
-      log.warn("Cache write fail : ", e);
-    }
-    return null;
-  }
-  private <T> T stringToObject(String json, Class<T> valueType) {
-    try {
-      return objectMapper.readValue(json, valueType);
-    } catch (JsonProcessingException e) {
-      log.warn("Cache to Object Fail : ", e);
-    }
-    return (T) new Object();
-  }
-
 }
